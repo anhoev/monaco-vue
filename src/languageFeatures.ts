@@ -159,16 +159,10 @@ export class CloseTagAdapter {
          //autoCloseTag here
          const range = e.changes[0].range;
          let position = ls.Position.create(range.startLineNumber - 1, range.startColumn);
-         let position2 = ls.Position.create(range.startLineNumber - 1, range.startColumn + 1);
          return worker.doAutoClose(resource.toString(), position).then((tag) => {
             //window['currentEditor'].trigger('keyboard', 'type', {text: tag});
-            model;
             model.applyEdits([{
                range: Range.fromPositions({ lineNumber: position.line + 1, column: position.character + 1 }),
-               text: tag
-            }] as Array<IIdentifiedSingleEditOperation>);
-            window['currentEditor'].executeEdits("", [{
-               range: Range.fromPositions({lineNumber: position.line + 1, column: position.character + 1}),
                text: tag
             }] as Array<IIdentifiedSingleEditOperation>);
             //ls.TextEdit.insert(position, tag);
