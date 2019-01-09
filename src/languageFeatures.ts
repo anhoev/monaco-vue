@@ -111,7 +111,7 @@ export class CloseTagAdapter {
          let handle: number;
          this._listener[model.uri.toString()] = model.onDidChangeContent((e) => {
             clearTimeout(handle);
-            handle = setTimeout(() => this._doCloseTag(model.uri, modeId, e), 0);
+            handle = setTimeout(() => this._doCloseTag(model.uri, modeId, e, model), 0);
          });
       };
 
@@ -154,7 +154,7 @@ export class CloseTagAdapter {
       this._disposables = [];
    }
 
-   private _doCloseTag(resource: Uri, languageId: string, e: any): void {
+   private _doCloseTag(resource: Uri, languageId: string, e: any, model: monaco.editor.IModel): void {
       this._worker(resource).then(worker => {
          //autoCloseTag here
          const range = e.changes[0].range;
@@ -162,7 +162,11 @@ export class CloseTagAdapter {
          let position2 = ls.Position.create(range.startLineNumber - 1, range.startColumn + 1);
          return worker.doAutoClose(resource.toString(), position).then((tag) => {
             //window['currentEditor'].trigger('keyboard', 'type', {text: tag});
-
+            model;
+            model.applyEdits([{
+               range: Range.fromPositions({ lineNumber: position.line + 1, column: position.character + 1 }),
+               text: tag
+            }] as Array<IIdentifiedSingleEditOperation>);
             window['currentEditor'].executeEdits("", [{
                range: Range.fromPositions({lineNumber: position.line + 1, column: position.character + 1}),
                text: tag
