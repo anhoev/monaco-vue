@@ -83,10 +83,10 @@
 			}
 		});
 		var editor = monaco.editor.create(document.getElementById('container'), { model: model, theme: 'vue' });
+		window.currentEditor = editor;
 
-		editor.onDidChangeModelContent(function () {
+		editor.onDidChangeModelContent(function (e) {
 			document.getElementById('my-app').innerHTML = "<my-component></my-component>";
-
 			vm = new Vue({
 				el: '#my-app',
 				components: {

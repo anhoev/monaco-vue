@@ -47,6 +47,8 @@ export interface LanguageMode {
 }
 
 export interface LanguageModes {
+   documentRegions:any;
+   jsMode: any;
 	getModeAtPosition(document: TextDocument, position: Position): LanguageMode;
 	getModesInRange(document: TextDocument, range: Range): LanguageModeRange[];
 	getAllModes(): LanguageMode[];
@@ -82,6 +84,8 @@ export function getLanguageModes(_ctx: IWorkerContext, supportedLanguages: { [la
 		};
 
         return {
+           documentRegions,
+           jsMode,
             getModeAtPosition(document: TextDocument, position: Position): LanguageMode {
                 let languageId = documentRegions.get(document).getLanguageAtPosition(position);
                 if (languageId) {

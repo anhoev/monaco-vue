@@ -7,7 +7,7 @@ import { LanguageMode } from '../languageModes';
 import { VueDocumentRegions } from '../embeddedSupport';
 
 import { HTMLDocument, parseHTMLDocument } from '../template/parser/htmlParser';
-import { doComplete } from '../template/services/htmlCompletion';
+import { doComplete, doTagComplete } from '../template/services/htmlCompletion';
 import { doHover } from '../template/services/htmlHover';
 import { findDocumentHighlights } from '../template/services/htmlHighlighting';
 import { findDocumentLinks } from '../template/services/htmlLinks';
@@ -71,6 +71,15 @@ export function getVueHTMLMode(
 	//   return htmlFormat(document, range, formattingOptions);
 		return null;
     },
+     doAutoClose(document: TextDocument, position: Position) {
+        const embedded = embeddedDocuments.get(document);
+        let offset = document.offsetAt(position);
+        let text = document.getText();
+        if (offset > 0 && text.charAt(offset - 1).match(/[>\/]/g)) {
+           return doTagComplete(document, position, vueDocuments.get(embedded));
+        }
+        return null;
+     },
     onDocumentRemoved(document: TextDocument) {
 	  vueDocuments.onDocumentRemoved(document);
     },

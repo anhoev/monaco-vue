@@ -12,6 +12,7 @@ import { HTMLDocument } from '../parser/htmlParser';
 import { TokenType, createScanner, ScannerState } from '../parser/htmlScanner';
 import { IHTMLTagProvider } from '../tagProviders/common';
 import * as emmet from './emmetHelper';
+import {isEmptyElement} from "../tagProviders/htmlTags";
 
 export function doComplete(
   document: TextDocument,
@@ -319,4 +320,41 @@ function getWordEnd(s: string, offset: number, limit: number): number {
     offset++;
   }
   return offset;
+}
+
+export function doTagComplete(document: TextDocument, position: Position, htmlDocument: HTMLDocument): string | null {
+  let offset = document.offsetAt(position);
+  if (offset <= 0) {
+    return null;
+  }
+  let char = document.getText().charAt(offset - 1);
+  if (char === '>') {
+    let node = htmlDocument.findNodeBefore(offset);
+    if (node && node.tag && !isEmptyElement(node.tag) && node.start < offset && (!node.endTagStart || node.endTagStart > offset)) {
+      let scanner = createScanner(document.getText(), node.start);
+      let token = scanner.scan();
+      while (token !== TokenType.EOS && scanner.getTokenEnd() <= offset) {
+        if (token === TokenType.StartTagClose && scanner.getTokenEnd() === offset) {
+          return `</${node.tag}>`;
+        }
+        token = scanner.scan();
+      }
+    }
+  } else if (char === '/') {
+    let node = htmlDocument.findNodeBefore(offset);
+    while (node && node.closed) {
+      node = node.parent;
+    }
+    if (node && node.tag) {
+      let scanner = createScanner(document.getText(), node.start);
+      let token = scanner.scan();
+      while (token !== TokenType.EOS && scanner.getTokenEnd() <= offset) {
+        if (token === TokenType.EndTagOpen && scanner.getTokenEnd() === offset) {
+          return `${node.tag}>`;
+        }
+        token = scanner.scan();
+      }
+    }
+  }
+  return null;
 }
