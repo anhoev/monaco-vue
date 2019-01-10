@@ -155,6 +155,7 @@ export class CloseTagAdapter {
    }
 
    private _doCloseTag(resource: Uri, languageId: string, e: any, model: monaco.editor.IModel): void {
+      if (e.changes[0].text !== '>') return;
       this._worker(resource).then(worker => {
          //autoCloseTag here
          const range = e.changes[0].range;
