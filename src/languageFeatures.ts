@@ -160,12 +160,18 @@ export class CloseTagAdapter {
          const range = e.changes[0].range;
          let position = ls.Position.create(range.startLineNumber - 1, range.startColumn);
          return worker.doAutoClose(resource.toString(), position).then((tag) => {
-            //window['currentEditor'].trigger('keyboard', 'type', {text: tag});
+            if (!tag)
+               return;
+            const line = model['_lines'][position.line];
+            const text = line.text.slice(0, position.character) + ' ' + tag + line.text.slice(position.character);
+            line._setText(text);
+
+            const range = new Range(position.line + 1, position.character + 1, position.line + 1,position.character + 2 );
             model.applyEdits([{
-               range: Range.fromPositions({ lineNumber: position.line + 1, column: position.character + 1 }),
-               text: tag
+               range,
+               text: '',
+               forceMoveMarkers: true
             }] as Array<IIdentifiedSingleEditOperation>);
-            //ls.TextEdit.insert(position, tag);
          });
       }).then(undefined, err => {
          console.error(err);
