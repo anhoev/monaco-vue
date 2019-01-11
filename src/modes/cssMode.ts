@@ -39,24 +39,24 @@ export function getCSSMode(documentRegions: LanguageModelCache<VueDocumentRegion
 				showAbbreviationSuggestions: true,
 				syntaxProfiles: {},
 				variables: {},
-				preferences: {}				
+				preferences: {}
 			});
-			const emmetItems = emmetCompletions.items.map(i => {
+			const emmetItems = emmetCompletions ? emmetCompletions.items.map(i => {
 				return {
 				  ...i,
 				  sortText: Priority.Emmet + i.label
 				};
-			})
-			
+			}) : [];
+
 			const lsCompletions = cssLanguageService.doComplete(embedded, position, cssStylesheets.get(embedded));
-			
+
 			const lsItems = lsCompletions ? lsCompletions.items.map(i => {
 				return {
 				  ...i,
 				  sortText: Priority.Platform + i.label
 				};
 			  }) : [];
-		
+
 			return {
 				isIncomplete: true,
 				items: emmetItems.concat(lsItems)
